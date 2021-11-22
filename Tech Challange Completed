@@ -1,0 +1,33 @@
+vpc = {
+  cidr           = "10.1.0.0/16"
+  public_subnet  = ["10.1.0.0/24", "10.1.1.0/24"]
+  private_subnet = ["10.1.2.0/24", "10.1.3.0/24"]
+}
+loadbalancer = {
+  lb_port                     = "80"
+  lb_protocol                 = "HTTP"
+  healthy_threshold           = 2
+  unhealthy_threshold         = 5
+  timeout                     = 10
+  interval                    = 30
+  sec_group_ingress_from_port = "80"
+  sec_group_ingress_to_port   = "80"
+}
+ec2 = {
+  ami           = "ami-0b0af3577fe5e3532"
+  instance_type = "t2.micro"
+  key_name      = "al-sesay25"
+}
+asg = {
+  lt_name          = "launchtemplate"
+  key_name         = "al-sesay25" 
+  image_id         = "ami-0b0af3577fe5e3532"
+  instance_type    = "t2.micro"
+  asg_name         = "terraformassignment"
+  desired_capacity = 2
+  max_size         = 6
+  min_size         = 2
+}
+s3 = {
+  name = "assignment-12a"
+}
