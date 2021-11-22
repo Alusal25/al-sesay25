@@ -1,9 +1,3 @@
-output "alb" {
-  value = aws_lb.alb
-}
-output "alb_sg" {
-  value = aws_security_group.alb_sec_group
-}
-output tg {
-  value       = aws_lb_target_group.tg
+output "output" {
+  value = aws_autoscaling_group.asg
 }
