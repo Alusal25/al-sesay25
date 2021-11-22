@@ -1,0 +1,51 @@
+data "aws_availability_zones" "azs" {}
+module "vpc" {
+  source            = "./modules/vpc"
+  vpc_cidr          = var.vpc.cidr
+  public_subnet     = var.vpc.public_subnet
+  private_subnet    = var.vpc.private_subnet
+  availability_zone = data.aws_availability_zones.azs.names
+}
+module "ec2_instance" {
+  source        = "./modules/ec2"
+  ami           = var.ec2.ami
+  instance_type = var.ec2.instance_type
+  key_name      = var.ec2.key_name
+  subnet_id     = module.vpc.output.public_subnet[1]
+  vpc_id        = module.vpc.output.id
+
+}
+module "alb" {
+  source                      = "./modules/alb"
+  vpc_id                      = module.vpc.output.id
+  subnet_id                   = module.vpc.output.public_subnet
+  lb_port                     = var.loadbalancer.lb_port
+  lb_protocol                 = var.loadbalancer.lb_protocol
+  healthy_threshold           = var.loadbalancer.healthy_threshold
+  unhealthy_threshold         = var.loadbalancer.unhealthy_threshold
+  timeout                     = var.loadbalancer.timeout
+  interval                    = var.loadbalancer.interval
+  asg                         = module.asg.output.id
+  sec_group_ingress_from_port = var.loadbalancer.sec_group_ingress_from_port
+  sec_group_ingress_to_port   = var.loadbalancer.sec_group_ingress_to_port
+  tags = {
+    Environment = "Test"
+  }
+}
+module "asg" {
+  source           = "./modules/asg"
+  subnet_id        = module.vpc.output.private_subnet
+  vpc_id           = module.vpc.output.id
+  lt_name          = var.asg.lt_name
+  image_id         = var.asg.image_id
+  instance_type    = var.asg.instance_type
+  asg_name         = var.asg.asg_name
+  desired_capacity = var.asg.desired_capacity
+  max_size         = var.asg.max_size
+  min_size         = var.asg.min_size
+  target_group     = module.alb.tg.arn
+}
+module "s3" {
+  source = "./modules/s3"
+  name   = var.s3.name
+}
