@@ -1,38 +1,21 @@
-resource "aws_launch_template" "lt" {
-  name          = var.lt_name
-  image_id      = var.image_id
-  instance_type = var.instance_type
-  user_data     = filebase64("${path.module}/user-data.sh")
-  network_interfaces {
-    subnet_id       = var.subnet_id[1]
-    security_groups = [aws_security_group.asg_sec_group.id]
+resource "aws_instance" "web" {
+  ami                         = var.ami
+  instance_type               = var.instance_type
+  key_name                    = var.key_name
+  associate_public_ip_address = true
+  root_block_device {
+    volume_size = var.volume_size
   }
-  block_device_mappings {
-    device_name = "/dev/sdh"
-    ebs {
-      volume_size = 20
-    }
-  }
-  key_name = var.key_name
-}
-
-resource "aws_autoscaling_group" "asg" {
-  name             = var.asg_name
-  desired_capacity = var.desired_capacity
-  max_size         = var.max_size
-  min_size         = var.min_size
-  # vpc_zone_identifier = var.subnet_id
-  target_group_arns   = [var.target_group]
-  launch_template {
-    id      = aws_launch_template.lt.id
-    version = "$Latest"
+  subnet_id       = var.subnet_id
+  security_groups = [aws_security_group.ec2_sec_group.id]
+  tags = {
+    Name = "StandAlone Ec2"
   }
 }
-resource "aws_security_group" "asg_sec_group" {
-  name        = "asg_sec_group"
+resource "aws_security_group" "ec2_sec_group" {
+  name        = "ec2_sec_group"
   description = "Allow TLS inbound traffic"
   vpc_id      = var.vpc_id
-
   ingress {
     description = "TLS from VPC"
     from_port   = 0
