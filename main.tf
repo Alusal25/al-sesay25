@@ -1,33 +1,33 @@
-resource "aws_instance" "web" {
-  ami                         = var.ami
-  instance_type               = var.instance_type
-  key_name                    = var.key_name
-  associate_public_ip_address = true
-  root_block_device {
-    volume_size = var.volume_size
-  }
-  subnet_id       = var.subnet_id
-  security_groups = [aws_security_group.ec2_sec_group.id]
-  tags = {
-    Name = "StandAlone Ec2"
-  }
-}
-resource "aws_security_group" "ec2_sec_group" {
-  name        = "ec2_sec_group"
-  description = "Allow TLS inbound traffic"
-  vpc_id      = var.vpc_id
-  ingress {
-    description = "TLS from VPC"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+resource "aws_s3_bucket" "lifecycle-testing" {
+  bucket = var.name
+  acl    = "private"
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  lifecycle_rule {
+    id      = "archive"
+    enabled = true
+
+    prefix = "archive/"
+
+    tags = {
+      rule = "archive"
+    }
+    transition {
+      days          = 90
+      storage_class = "GLACIER"
+    }
+  }
+  lifecycle_rule {
+    id      = "log"
+    enabled = true
+
+    prefix = "log/"
+
+    tags = {
+      rule      = "log"
+      autoclean = "true"
+    }
+    expiration {
+      days = 90
+    }
   }
 }

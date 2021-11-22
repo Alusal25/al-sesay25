@@ -1,3 +1,3 @@
 output output {
-  value       = aws_instance.web
+  value       = aws_s3_bucket.lifecycle-testing
 }
