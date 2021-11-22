@@ -1,0 +1,46 @@
+variable "vpc" {
+  type = object({
+    private_subnet = list(string)
+    public_subnet  = list(string)
+    cidr           = string
+  })
+}
+variable "loadbalancer" {
+  type = object({
+    lb_port                     = string
+    lb_protocol                 = string
+    healthy_threshold           = number
+    unhealthy_threshold         = number
+    timeout                     = number
+    interval                    = number
+    sec_group_ingress_from_port = string
+    sec_group_ingress_to_port   = string
+  })
+  description = "description"
+}
+
+variable "ec2" {
+  type = object({
+    ami           = string
+    instance_type = string
+    key_name      = string
+  })
+}
+variable "asg" {
+  type = object({
+    lt_name          = string
+    image_id         = string
+    instance_type    = string
+    asg_name         = string
+    desired_capacity = number
+    max_size         = number
+    min_size         = number
+    key_name         = string
+
+  })
+}
+variable "s3" {
+  type = object({
+    name = string
+  })
+}
